@@ -1,7 +1,5 @@
 package com.openclassroom.eventorias.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -14,17 +12,25 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    background = eventorias_black,
+    onBackground = eventorias_black,
+    surface = eventorias_black,
+    onSurface = eventorias_black
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+
+    background = eventorias_black,
+    onBackground = eventorias_black,
+    surface = eventorias_black,
+    onSurface = eventorias_black
 
     /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
@@ -41,13 +47,14 @@ fun EventoriasTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
+        //TODO - On force le darktheme pour le momement !
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> DarkColorScheme //LightColorScheme
     }
 
     MaterialTheme(
