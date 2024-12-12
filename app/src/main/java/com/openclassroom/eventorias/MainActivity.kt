@@ -1,16 +1,23 @@
 package com.openclassroom.eventorias
 
+import android.animation.ObjectAnimator
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.view.View
+import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+
+import androidx.core.animation.doOnEnd
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.openclassroom.eventorias.navigation.EventoriasNavHost
+import com.openclassroom.eventorias.navigation.Screens
 import com.openclassroom.eventorias.ui.theme.EventoriasTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,32 +25,60 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
+        setupSplashScreenEndAnimation()
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             EventoriasTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                EventoriasNavHost(
+                    navHostController = navController,
+                    // Check if the user is logged in or not to set the start destination
+                    startDestination = if (FirebaseAuth.getInstance().currentUser == null){
+                        Screens.Authentication.route
+                    } else{
+                        Screens.EventsFeed.route
+                    }
+                )
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EventoriasTheme {
-        Greeting("Android")
+    /**
+     * Method to setup the splash screen end transition animation.
+     */
+    private fun setupSplashScreenEndAnimation(){
+        //Callback that is called when the splash screen is animating to the main content.
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            // Create your custom animation to execute a the end of the splashscreen.
+            val slideLeft = ObjectAnimator.ofFloat(splashScreenView, View.TRANSLATION_X,0f,-splashScreenView.width.toFloat())
+            slideLeft.interpolator = AccelerateInterpolator()
+            slideLeft.duration = 180L
+            slideLeft.doOnEnd { splashScreenView.remove() }
+          //  slideLeft.start()
+
+
+
+            val alphaShading = ObjectAnimator.ofFloat(splashScreenView, View.ALPHA,1.0f,0.0f)
+            alphaShading.interpolator = AccelerateInterpolator()
+            alphaShading.duration = 300L
+            alphaShading.doOnEnd { splashScreenView.remove() }
+            alphaShading.start()
+
+        }
+
+
+
+
     }
+
 }
+
+
+
+
+
+
+
+
