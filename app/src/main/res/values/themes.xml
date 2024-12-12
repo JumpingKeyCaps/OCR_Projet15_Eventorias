@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Eventorias" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Eventorias" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/eventorias_black</item>
+    </style>
+
+    <style name="Theme.Eventorias.SplashScreen" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@color/eventorias_black</item>
+        <item name="windowSplashScreenBackground">@color/eventorias_black</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/eventorias_black</item>
+        <item name="postSplashScreenTheme">@style/Theme.Eventorias</item>
+    </style>
+
+
 </resources>
