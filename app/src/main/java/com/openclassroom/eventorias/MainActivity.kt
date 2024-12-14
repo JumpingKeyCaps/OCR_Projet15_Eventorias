@@ -1,11 +1,7 @@
 package com.openclassroom.eventorias
 
 import android.animation.ObjectAnimator
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
