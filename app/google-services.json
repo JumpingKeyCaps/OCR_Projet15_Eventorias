@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "896720934508",
+    "project_id": "eventorias-527ff",
+    "storage_bucket": "eventorias-527ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896720934508:android:58f8048d044ed055dcaa49",
+        "android_client_info": {
+          "package_name": "com.openclassroom.eventorias"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "896720934508-1pb5u6156t8auh7ku3e2i81lt6n08ko9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.openclassroom.eventorias",
+            "certificate_hash": "16dc159c089e0b6b55879dfe836e2bd8ed274f99"
+          }
+        },
+        {
+          "client_id": "896720934508-vd0p5qel7jv7m4pmtoa83blsvmcqf2bh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyZhtHaMwcCyWOITHeytei0Bfdg5X31yg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "896720934508-vd0p5qel7jv7m4pmtoa83blsvmcqf2bh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
