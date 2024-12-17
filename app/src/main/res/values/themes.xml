@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Eventorias" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Eventorias" parent="android:Theme.DeviceDefault.NoActionBar">
         <item name="android:windowBackground">@color/eventorias_black</item>
+        <item name="android:statusBarColor">@color/eventorias_black</item>
+        <item name="android:navigationBarColor">@color/eventorias_black</item>
     </style>
 
     <style name="Theme.Eventorias.SplashScreen" parent="android:Theme.Material.NoActionBar.Fullscreen">

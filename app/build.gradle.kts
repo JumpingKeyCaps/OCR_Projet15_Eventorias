@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-   // id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,7 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.firebase.auth.ktx)
+
     //Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -97,10 +97,24 @@ dependencies {
     implementation (libs.accompanist.pager)
     implementation (libs.accompanist.pager.indicators)
 
+
     //Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
     //SplashScreen
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
+
+    //firebase
+    implementation(libs.firebase.auth.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation ("com.google.android.gms:play-services-auth")
+
+    //material
+    implementation ("androidx.compose.material:material:1.7.6")
+
+    //accompanist
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+
 
 }

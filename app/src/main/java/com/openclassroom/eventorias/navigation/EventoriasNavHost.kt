@@ -4,17 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.openclassroom.eventorias.screen.auth.AuthenticationScreen
+import com.openclassroom.eventorias.screen.main.MainScreen
 
 @Composable
-fun EventoriasNavHost(navHostController: NavHostController, startDestination: String) {
+fun EventoriasNavHost(
+    navHostController: NavHostController,
+    startDestination: String,
+    onGoogleSignIn: () -> Unit
+) {
     NavHost(
         navController = navHostController,
-        startDestination = startDestination
+        startDestination = startDestination,
     ) {
 
-        //-- Events Feed Screen
-        composable(route = Screens.EventsFeed.route) {
-           //TODO - Events Feed Screen
+        //-- Main Screen
+        composable(route = Screens.Main.route) {
+           //TODO - App main Screen
+            MainScreen(navController = navHostController)
         }
 
         //-- Event Details Screen
@@ -30,11 +37,18 @@ fun EventoriasNavHost(navHostController: NavHostController, startDestination: St
         //-- Authentication Screen
         composable(route = Screens.Authentication.route) {
             //TODO - Authentication Screen
-        }
+            AuthenticationScreen(
+                onNavigateToEventsFeedScreen = {
+                    navHostController.navigate(Screens.Main.route){
+                        //clean the nav backstack
+                        popUpTo(0)
+                        launchSingleTop = true
+                        restoreState = false
+                    }
 
-        //-- User Profile Screen
-        composable(route = Screens.UserProfile.route) {
-            //TODO - User Profile Screen
+                },
+                onGoogleSignIn = {onGoogleSignIn()}
+            )
         }
 
 
