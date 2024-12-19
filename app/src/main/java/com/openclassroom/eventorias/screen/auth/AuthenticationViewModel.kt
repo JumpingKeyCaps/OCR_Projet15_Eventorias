@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.openclassroom.eventorias.data.repository.AuthenticationRepository
+import com.openclassroom.eventorias.data.repository.UserStoreRepository
+import com.openclassroom.eventorias.domain.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,7 +16,7 @@ import javax.inject.Inject
  * ViewModel for authentication-related operations.
  */
 @HiltViewModel
-class AuthenticationViewModel @Inject constructor(private val authRepository: AuthenticationRepository) : ViewModel() {
+class AuthenticationViewModel @Inject constructor(private val authRepository: AuthenticationRepository, private val userRepository: UserStoreRepository) : ViewModel() {
 
     private val _signUpResult = MutableSharedFlow<Result<FirebaseUser?>>()
     val signUpResult: SharedFlow<Result<FirebaseUser?>> get() = _signUpResult
@@ -41,13 +43,22 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
                         val user = result.getOrNull()
                         if (user != null) {
                             //Add user in DataBase
-              //              userRepository.addUser(User(user.uid,firstName,lastName),{}, {} )
+                            addUserProfileEntryInDatabase(User(user.uid,firstName,lastName,user.email?:"none"))
                         }
 
                         _signUpResult.emit(result)
                     }
                 }
         }
+    }
+
+
+    /**
+     * Add a new user profile entry in the database
+     * @param user The user to add
+     */
+    fun addUserProfileEntryInDatabase(user: User) {
+        userRepository.addUser(user,{}, {} )
     }
 
 

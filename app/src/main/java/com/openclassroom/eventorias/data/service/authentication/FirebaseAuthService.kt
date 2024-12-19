@@ -1,4 +1,4 @@
-package com.openclassroom.eventorias.data.service
+package com.openclassroom.eventorias.data.service.authentication
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
