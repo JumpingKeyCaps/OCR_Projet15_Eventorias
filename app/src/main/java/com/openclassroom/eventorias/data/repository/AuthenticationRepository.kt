@@ -1,7 +1,7 @@
 package com.openclassroom.eventorias.data.repository
 
 import com.google.firebase.auth.FirebaseUser
-import com.openclassroom.eventorias.data.service.FirebaseAuthService
+import com.openclassroom.eventorias.data.service.authentication.FirebaseAuthService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
