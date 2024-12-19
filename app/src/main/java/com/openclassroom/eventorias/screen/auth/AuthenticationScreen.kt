@@ -1,5 +1,10 @@
 package com.openclassroom.eventorias.screen.auth
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 
@@ -45,7 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.openclassroom.eventorias.R
+import com.openclassroom.eventorias.domain.User
 import com.openclassroom.eventorias.ui.theme.authentication_red
 import com.openclassroom.eventorias.ui.theme.authentication_white
 import kotlinx.coroutines.launch
@@ -59,8 +71,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AuthenticationScreen(
     viewModel: AuthenticationViewModel = hiltViewModel(),
-    onNavigateToEventsFeedScreen: () -> Unit,
-    onGoogleSignIn: () -> Unit
+    onNavigateToEventsFeedScreen: () -> Unit
 ){
 
     // État pour contrôler l'affichage du Bottom Sheet
@@ -110,6 +121,65 @@ fun AuthenticationScreen(
             signUpButtonState = true
         }
     }
+
+
+
+
+    // Configure Google SignIn
+    val oneTapClient = Identity.getSignInClient(LocalContext.current)
+    val signInRequest = BeginSignInRequest.builder()
+        .setGoogleIdTokenRequestOptions(
+            BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                .setSupported(true)
+                .setServerClientId(LocalContext.current.getString(R.string.default_web_client_id)) // Ton Web client ID
+                .setFilterByAuthorizedAccounts(false) // Permet de gérer les nouveaux comptes
+                .build()
+        )
+        .setAutoSelectEnabled(true) // Auto-login si possible
+        .build()
+
+    //Create our google sign in Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { intent ->
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(intent)
+                    val idToken = credential.googleIdToken
+                    if (idToken != null) {
+                        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                        FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
+                            .addOnCompleteListener { authTask ->
+                                if (authTask.isSuccessful) {
+                                    Log.d("SignIn", "Sign in successful: ${authTask.result?.user?.email}")
+
+
+                                    //todo - ADD THE NEW USER PROFILE TO FIRESTORE
+                                    viewModel.addUserProfileEntryInDatabase(
+                                        User(
+                                            id = authTask.result.user!!.uid,
+                                            firstname = credential.givenName?:"none",
+                                            lastname = credential.familyName?:"none",
+                                            email = authTask.result.user!!.email?:"none",
+                                        )
+                                    )
+                                    // Navigation ou mise à jour de l'interface
+                                    onNavigateToEventsFeedScreen()
+                                } else {
+                                    Log.e("SignIn", "Sign in failed", authTask.exception)
+                                }
+                            }
+                    } else {
+                        Log.e("SignIn", "No ID token!")
+                    }
+                } catch (e: ApiException) {
+                    Log.e("SignIn", "Google sign-in failed", e)
+                }
+            }
+        }
+    }
+
 
 
 
@@ -257,7 +327,22 @@ fun AuthenticationScreen(
 
                 //BUTTON GOOGLE SIGN IN --------------------------
                 Button(
-                    onClick = {onGoogleSignIn()},
+                    onClick = {
+                        oneTapClient.beginSignIn(signInRequest)
+                            .addOnSuccessListener { result ->
+                                try {
+                                    googleSignInLauncher.launch(
+                                        IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("SignIn", "Error launching IntentSender: ${e.localizedMessage}")
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("SignIn", "Google Sign-in failed: ${e.localizedMessage}")
+                            }
+
+                    },
                     colors = ButtonDefaults.buttonColors(authentication_white),
                     shape = RoundedCornerShape(5.dp),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
