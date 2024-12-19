@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.openclassroom.eventorias"
-        minSdk = 31
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -104,12 +104,14 @@ dependencies {
     //SplashScreen
     implementation(libs.androidx.core.splashscreen)
 
-    //firebase
+    //firebase auth
     implementation(libs.firebase.auth.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation ("com.google.android.gms:play-services-auth")
 
+    //firebase firestore
+    implementation ("com.google.firebase:firebase-firestore-ktx:25.1.1")
     //material
     implementation ("androidx.compose.material:material:1.7.6")
 

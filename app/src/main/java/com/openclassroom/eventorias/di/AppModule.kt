@@ -1,7 +1,9 @@
 package com.openclassroom.eventorias.di
 
 import com.openclassroom.eventorias.data.repository.AuthenticationRepository
-import com.openclassroom.eventorias.data.service.FirebaseAuthService
+import com.openclassroom.eventorias.data.repository.UserStoreRepository
+import com.openclassroom.eventorias.data.service.authentication.FirebaseAuthService
+import com.openclassroom.eventorias.data.service.firestore.FirestoreService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,5 +39,28 @@ class AppModule {
     fun provideFirebaseAuthService(): FirebaseAuthService {
         return FirebaseAuthService()
     }
+
+
+    /**
+     * Provides a Singleton instance of FirestoreService.
+     * @return A Singleton instance of FirestoreService.
+     */
+    @Provides
+    @Singleton
+    fun provideFirestoreService(): FirestoreService {
+        return FirestoreService()
+    }
+
+    /**
+     * Provides a Singleton instance of UserStoreRepository.
+     * @param storeService The FirestoreService instance.
+     * @return A Singleton instance of UserStoreRepository.
+     */
+    @Provides
+    @Singleton
+    fun provideUserStoreRepository(storeService: FirestoreService): UserStoreRepository {
+        return UserStoreRepository(storeService)
+    }
+
 
 }
