@@ -10,8 +10,7 @@ import com.openclassroom.eventorias.screen.main.MainScreen
 @Composable
 fun EventoriasNavHost(
     navHostController: NavHostController,
-    startDestination: String,
-    onGoogleSignIn: () -> Unit
+    startDestination: String
 ) {
     NavHost(
         navController = navHostController,
@@ -21,18 +20,10 @@ fun EventoriasNavHost(
         //-- Main Screen
         composable(route = Screens.Main.route) {
            //TODO - App main Screen
-            MainScreen(navController = navHostController)
+            MainScreen()
         }
 
-        //-- Event Details Screen
-        composable(route = Screens.EventDetails.route) {
-            //TODO - Event Details Screen
-        }
 
-        //-- Create Event Screen
-        composable(route = Screens.CreateEvent.route) {
-            //TODO - Create Event Screen
-        }
 
         //-- Authentication Screen
         composable(route = Screens.Authentication.route) {
@@ -46,8 +37,7 @@ fun EventoriasNavHost(
                         restoreState = false
                     }
 
-                },
-                onGoogleSignIn = {onGoogleSignIn()}
+                }
             )
         }
 
