@@ -12,6 +12,10 @@ sealed class Screens(
 
     data object Authentication : Screens("authentication")
 
+    data object UserProfile : Screens("userProfile")
+
+    data object EventsFeed : Screens("eventsFeed")
+
     data object EventDetails : Screens("eventDetails/{postId}") {
         fun createRoute(eventId: String): String = "eventDetails/$eventId"
     }
