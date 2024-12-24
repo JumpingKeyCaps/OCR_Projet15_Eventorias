@@ -20,16 +20,20 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(private val userStoreRepository: UserStoreRepository, private val authRepository: AuthenticationRepository) : ViewModel(){
 
 
-
+    //sign out result
     private val _signOutResult = MutableSharedFlow<Result<Unit>>()
     val signOutResult: SharedFlow<Result<Unit>> get() = _signOutResult
-
+    //delete account result
     private val _deleteAccountResult = MutableSharedFlow<Result<Unit>>()
     val deleteAccountResult: SharedFlow<Result<Unit>> get() = _deleteAccountResult
 
-
+    //user profile data
     private val _currentUserProfile = MutableStateFlow<User?>(null)
     val currentUserProfile: MutableStateFlow<User?> get() = _currentUserProfile
+
+    //notif
+    private val _notificationsEnabled = MutableStateFlow(false)
+    val notificationsEnabled: MutableStateFlow<Boolean> get() = _notificationsEnabled
 
 
 
@@ -99,7 +103,9 @@ class UserProfileViewModel @Inject constructor(private val userStoreRepository: 
 
 
 
-
+    fun setNotificationsEnabled(enabled: Boolean) {
+        _notificationsEnabled.value = enabled
+    }
 
 
 
