@@ -8,6 +8,7 @@ import javax.inject.Inject
 
 /**
  * Repository for authentication-related operations.
+ * @param authService The service for authentication operations (hilt injected).
  */
 class AuthenticationRepository @Inject constructor(private val authService: FirebaseAuthService) {
 
@@ -41,6 +42,7 @@ class AuthenticationRepository @Inject constructor(private val authService: Fire
 
     /**
      * Delete the current user account.
+     * @param user The user to delete.
      * @return A flow emitting the result of the account deletion operation.
      */
     fun deleteUserAccount(user: FirebaseUser): Flow<Result<Unit>> = flow {
