@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Eventorias</string>
+
+
+    <string name="google_maps_api_key">AIzaSyANkZOlsb9xkpVDuzZLArBe0FDdlOI_M-4</string>
+    <string name="no_internet_title">No Internet Connection !</string>
+    <string name="no_internet_content_description_doodle">Doodle no internet connection</string>
+    <string name="no_internet_main_text">Eventorias need an internet connection to work properly.</string>
+    <string name="no_internet_secondary_text">Please check your network and try again !</string>
+    <string name="no_internet_screen_description">Screen indicating that there is no internet connection available.</string>
+
+
 </resources>
