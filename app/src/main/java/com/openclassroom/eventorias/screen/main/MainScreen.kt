@@ -1,41 +1,32 @@
 package com.openclassroom.eventorias.screen.main
 
-import android.util.Log
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -43,92 +34,95 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.openclassroom.eventorias.R
+import com.openclassroom.eventorias.domain.Event
 import com.openclassroom.eventorias.navigation.Screens
 import com.openclassroom.eventorias.screen.main.eventsFeed.EventsFeedScreen
-import com.openclassroom.eventorias.screen.main.eventsFeed.EventsFeedState
 import com.openclassroom.eventorias.screen.main.userProfile.UserProfileScreen
-import com.openclassroom.eventorias.ui.theme.authentication_red
 import com.openclassroom.eventorias.ui.theme.eventorias_black
 import com.openclassroom.eventorias.ui.theme.eventorias_gray
+import com.openclassroom.eventorias.ui.theme.eventorias_white
 
 /**
  * Main screen composable function.
+ *  - Manages the inner navigation graph for the EventsFeed and UserProfile screens.
+ *  - Manages the bottom navigation bar.
  */
 @Composable
-fun MainScreen() {
-    // State pour la gestion de l'onglet sélectionné
-    val eventsFeedStateMode = remember { mutableStateOf<EventsFeedState>(EventsFeedState.Loading) }
-    eventsFeedStateMode.value = EventsFeedState.Error("An error occurred")
+fun MainScreen(
+    onLogOutAction: () -> Unit,
+    onCreateEventClicked: () -> Unit,
+    onEventClicked: (Event) -> Unit
+) {
 
     val currentUser = FirebaseAuth.getInstance().currentUser
-    Log.d("AuthUser", "MainScreen: Current user ID: ${currentUser?.uid ?: "User not found!"}")
-
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute  = navBackStackEntry?.destination?.route
 
     Scaffold(
-        topBar = { TopAppBar(currentRoute = currentRoute) },
-        bottomBar = { BottomNavigationBar(currentRoute = currentRoute, navController = navController)},
-        floatingActionButton = {
-            //Show the FAB only on the events feed screen with a success state
-            if(eventsFeedStateMode.value is EventsFeedState.Success){
-                CreateEventFloatingButton(navController = navController)
-            }
-        }
+        topBar = {}, // let empty, TopBar is managed by screens inside the inner-navigation graph
+        bottomBar = { BottomNavigationBar(currentRoute = currentRoute, navController = navController)}
     ) { innerPadding ->
         // Inner navigation graph
-        NavHost(navController, startDestination = Screens.EventsFeed.route, Modifier.padding(innerPadding)) {
-            //-- events feed Screen
-            composable(route = Screens.EventsFeed.route) {
-                EventsFeedScreen(eventsStateMode = eventsFeedStateMode)
-            }
-            //-- user profile screen
-            composable(route = Screens.UserProfile.route) {
-                UserProfileScreen(currentAuthUser = currentUser )
-            }
-        }
-
+        InnerNavigationGraph(
+            navController = navController,
+            startDestination = Screens.EventsFeed.route,
+            innerPadding = innerPadding,
+            onCreateEventClicked = onCreateEventClicked,
+            currentUser = currentUser,
+            onLogOutAction = onLogOutAction,
+            onEventClicked = onEventClicked
+        )
     }
 }
 
 
 /**
- * Top app bar composable function.
- * @param currentRoute The current route of the inner navigation graph.
+ * Inner navigation graph composable function.
+ * @param navController The navigation controller for the inner navigation graph.
+ * @param startDestination The start destination route for the inner navigation graph.
+ * @param innerPadding The inner padding values for the inner navigation graph.
+ * @param onCreateEventClicked The action to perform when creating an event(from EventsFeed screen FAB).
+ * @param currentUser The current Firebase user.
+ * @param onLogOutAction The action to perform when logging out (from UserProfile screen).
+ * @param onEventClicked The action to perform when clicking on an event (from EventsFeed screen).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(currentRoute: String?){
-    val isEventFeed = currentRoute == Screens.EventsFeed.route
-    TopAppBar(
-        title = { Text(text = if(isEventFeed) "Event list" else "User profile",
-            color = Color.White,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(start = 8.dp))},
-        colors = TopAppBarDefaults.topAppBarColors(eventorias_black),
-        actions = {
-            if(isEventFeed){
-                // EVENTS FEED SCREEN TOPBAR
-                IconButton(onClick = { /* TODO: action de recherche */ }) {
-                    Icon(Icons.Filled.Search, contentDescription = "Rechercher", tint = Color.White)
-                }
-                IconButton(onClick = { /* TODO: action de recherche */ }) {
-                    Icon(ImageVector.vectorResource(id = R.drawable.baseline_swap_vert_24), contentDescription = "Notifications", tint = Color.White)
-                }
-            }else{
-                //USER PROFIL SCREEN TOPBAR
-                //todo - user picture in userprofile case (to be implemented)
+fun InnerNavigationGraph(
+    navController: NavHostController,
+    startDestination: String,
+    innerPadding: PaddingValues,
+    onCreateEventClicked: () -> Unit,
+    currentUser: FirebaseUser? = null,
+    onLogOutAction: () -> Unit,
+    onEventClicked: (Event) -> Unit){
 
-
-            }
+    NavHost(navController, startDestination = startDestination, Modifier.padding(0.dp)) {
+        //-- Events feed Screen
+        composable(route = Screens.EventsFeed.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut() }
+        ) {
+            EventsFeedScreen(
+                onCreateEventClicked = onCreateEventClicked,
+                onEventClicked = {onEventClicked(it)},
+                innerPadding = innerPadding
+            )
         }
-    )
-
+        //-- User profile screen
+        composable(route = Screens.UserProfile.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }) + fadeOut() }
+        ) {
+            UserProfileScreen(currentAuthUser = currentUser, onLogOutAction = {
+                onLogOutAction()
+            }, innerPadding = innerPadding)
+        }
+    }
 }
+
 
 
 /**
@@ -152,29 +146,24 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.weight(0.30f))
-            //Nav Item - Events feed
+            //--- Nav Item -> Events feed
             NavigationBarItem(
                 modifier = Modifier.weight(0.20f),
                 selected = currentRoute == Screens.EventsFeed.route,
                 onClick = {
                     navController.navigate(Screens.EventsFeed.route) {
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large stack of destinations
-                        // on the back stack as users select items
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
+                        // Avoid building up a large stack of destinations
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true  }
+                        // Avoid multiple copies of the same destination
                         launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
+                        // Restore state when re selecting a previously selected item
                         restoreState = true
                     }
                 },
                 icon = {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.baseline_event_24),
-                        contentDescription = "Événements",
+                        contentDescription = "event icon",
                         tint = Color.White
                     )
                 },
@@ -186,29 +175,21 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
+                    selectedIconColor = eventorias_white,
+                    selectedTextColor = eventorias_white,
+                    unselectedIconColor = eventorias_gray,
+                    unselectedTextColor = eventorias_gray,
                     indicatorColor = if (currentRoute == Screens.EventsFeed.route) eventorias_gray else Color.Transparent
                 )
             )
-            //Nav Item - User Profile
+            //--- Nav Item -> User Profile
             NavigationBarItem(
                 modifier = Modifier.weight(0.20f),
                 selected = currentRoute == Screens.UserProfile.route,
                 onClick = {
                     navController.navigate(Screens.UserProfile.route) {
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large stack of destinations
-                        // on the back stack as users select items
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
                         restoreState = true
                     }
                 },
@@ -222,40 +203,21 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
                 label = {
                     Text(
                         text = "Profile",
-                        color = Color.White
+                        color = eventorias_white
                     )
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
+                    selectedIconColor = eventorias_white,
+                    selectedTextColor = eventorias_white,
+                    unselectedIconColor = eventorias_gray,
+                    unselectedTextColor = eventorias_gray,
                     indicatorColor = if (currentRoute == Screens.UserProfile.route) eventorias_gray else Color.Transparent
                 )
             )
             Spacer(modifier = Modifier.weight(0.30f))
         }
     }
-}
-
-
-/**
- * Floating action button composable function to add a new event.
- * @param navController The navigation controller for the inner navigation graph.
- */
-@Composable
-fun CreateEventFloatingButton(navController: NavHostController) {
-    FloatingActionButton(
-        onClick = {
-        // On navigue vers l'écran d'ajout d'événement
-        navController.navigate(Screens.CreateEvent.route)
-        },
-        containerColor = authentication_red,
-        contentColor = Color.White
-    ) {
-            Icon(Icons.Filled.Add, contentDescription = "Ajouter un événement")
-      }
 }
 
 
