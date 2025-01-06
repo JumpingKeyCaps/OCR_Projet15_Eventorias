@@ -6,41 +6,56 @@ import javax.inject.Inject
 
 /**
  * This class provides a repository for accessing and managing User data.
+ * @param firestoreService The service used to interact with FireStore (hilt injected)
  */
 class UserStoreRepository @Inject constructor(private val firestoreService: FirestoreService) {
 
     /**
-     * Adds a new User to the data base using the injected FirestoreService.
+     * Adds a new User to the database using the injected FireStoreService.
      * @param user The User object to be added.
-     * @param onSuccess Callback to be executed on successful addition.
-     * @param onFailure Callback to be executed on failure.
+     * @throws Exception in case of failure.
      */
-    fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestoreService.addUser(user, onSuccess, onFailure)
+    suspend fun addUser(user: User) {
+        firestoreService.addUser(user)
     }
 
     /**
-     * Retrieves a user from the data base using the injected FirestoreService.
-     * @param userId the user id to get.
-     * @param onSuccess Callback to be executed on successful retrieval.
-     * @param onFailure Callback to be executed on failure.
+     * Retrieves a user from the database.
+     * @param userId The user ID to get.
+     * @return The User object retrieved from the database.
+     * @throws Exception in case of failure.
      */
-    fun getUser(userId: String, onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) {
-        firestoreService.getUserById(userId,onSuccess, onFailure)
+    suspend fun getUser(userId: String): User {
+        return firestoreService.getUserById(userId)
     }
-
-
-
 
     /**
-     * Deletes a user from the data base by his ID
-     * @param userId the user id to delete.
-     * @param onSuccess Callback to be executed on successful deletion.
-     * @param onFailure Callback to be executed on failure.
+     * Deletes a user from the database by their ID.
+     * @param userId The user ID to delete.
+     * @throws Exception in case of failure.
      */
-    fun deleteUser(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        firestoreService.deleteUser(userId, onSuccess, onFailure)
+    suspend fun deleteUser(userId: String) {
+        firestoreService.deleteUser(userId)
     }
 
+    /**
+     * Updates the user's profile picture in the database.
+     * @param uid The user ID to update.
+     * @param profilePictureUrl The new profile picture URL.
+     * @throws Exception in case of failure.
+     */
+    suspend fun updateProfilePicture(uid: String, profilePictureUrl: String) {
+        firestoreService.updateUserProfilePicture(uid, profilePictureUrl)
+    }
+
+    /**
+     * Retrieves the user's profile picture URL from the database.
+     * @param userId The user ID.
+     * @return The profile picture URL.
+     * @throws Exception in case of failure.
+     */
+    suspend fun getUserProfilePicture(userId: String): String? {
+        return firestoreService.getUserProfilePicture(userId)
+    }
 
 }
