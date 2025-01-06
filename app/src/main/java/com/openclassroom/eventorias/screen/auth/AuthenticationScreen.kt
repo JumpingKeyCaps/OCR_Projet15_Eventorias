@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 /**
  * Authentication screen composable function.
  * @param viewModel The view model for the authentication screen.
- * @param onNavigateToHomeScreen The action to perform when the user is successfully authenticated.
+ * @param onNavigateToEventsFeedScreen The action to perform when the user is successfully authenticated.
  */
 @Composable
 fun AuthenticationScreen(
@@ -131,7 +131,7 @@ fun AuthenticationScreen(
         .setGoogleIdTokenRequestOptions(
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                 .setSupported(true)
-                .setServerClientId(LocalContext.current.getString(R.string.default_web_client_id)) // Ton Web client ID
+                .setServerClientId(LocalContext.current.getString(R.string.default_web_client_id)) //  Web client ID
                 .setFilterByAuthorizedAccounts(false) // Permet de gérer les nouveaux comptes
                 .build()
         )
@@ -183,16 +183,15 @@ fun AuthenticationScreen(
 
 
 
-    // Contenu principal avec le Bottom Sheet
+    // Bottom Sheet + screen main Content
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetContent = {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp) // Ajout du padding au start et end
-                    .height(LocalConfiguration.current.screenHeightDp.dp * 0.95f) // 99% de la hauteur de l'écran
+                    .height(LocalConfiguration.current.screenHeightDp.dp * 1.0f) // 99% de la hauteur de l'écran
             ) {
                 // Contenu de la sheet
                 HorizontalPager(
@@ -202,7 +201,7 @@ fun AuthenticationScreen(
                     // Calculer la position relative de la page par rapport à la page courante
                     val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
 
-                    // Appliquer une transformation cubique pour un effet fluide
+                    // Appliquer une transformation  pour un effet fluide
                     val cubicEffect = pageOffset * pageOffset * (3 - 2 * pageOffset)
 
                     Box(
@@ -405,7 +404,6 @@ fun AuthenticationScreen(
                             fontSize = 16.sp,
                             modifier = Modifier.weight(.85f)
                         )
-
                     }
                 }
 
@@ -428,9 +426,6 @@ fun AuthenticationScreen(
                 email = recoveryPasswordEmail
             )
         }
-
-
-
 
     }
 }

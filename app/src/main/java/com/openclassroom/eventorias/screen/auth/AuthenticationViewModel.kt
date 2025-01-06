@@ -24,44 +24,57 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
     private val _signInResult = MutableSharedFlow<Result<FirebaseUser?>>()
     val signInResult: SharedFlow<Result<FirebaseUser?>> get() = _signInResult
 
-    private val _passwordResetResult = MutableSharedFlow<Result<Unit>>()
-    val passwordResetResult: SharedFlow<Result<Unit>> get() = _passwordResetResult
-
-
     /**
      * Registers a new user with the provided email and password.
      * @param email The email address of the new user.
      * @param password The password for the new user.
+     * @param firstName The first name of the new user.
+     * @param lastName The last name of the new user.
      */
     fun signUpUser(email: String, password: String, firstName: String, lastName: String) {
         viewModelScope.launch {
             authRepository.registerUser(email, password)
                 .collect { result ->
-
-                    //on check si luser est bien ajouter
+                    //Check is the user is successfully added
                     if (result.isSuccess) {
                         val user = result.getOrNull()
                         if (user != null) {
-                            //Add user in DataBase
+                            //Add the user in DataBase
                             addUserProfileEntryInDatabase(User(user.uid,firstName,lastName,user.email?:"none"))
                         }
-
                         _signUpResult.emit(result)
                     }
                 }
         }
     }
 
-
     /**
-     * Add a new user profile entry in the database
-     * @param user The user to add
+     * Adds a new user profile entry in the database.
+     * @param user The user to add.
      */
     fun addUserProfileEntryInDatabase(user: User) {
-        userRepository.addUser(user,{}, {} )
+        val formattedUser = user.copy(
+            id = user.id,
+            email = user.email,
+            firstname = user.firstname.capitalizeFirstLetter(),
+            lastname = user.lastname.capitalizeFirstLetter()
+        )
+        viewModelScope.launch {
+            try {
+                userRepository.addUser(formattedUser)
+            } catch (_: Exception) {}
+        }
     }
 
-
+    /**
+     * Capitalizes the first letter of a string.
+     * @return The capitalized string.
+     */
+    private fun String.capitalizeFirstLetter(): String {
+        return this.lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase() else it.toString()
+        }
+    }
 
     /**
      * Signs in a user with the provided email and password.
@@ -84,13 +97,8 @@ class AuthenticationViewModel @Inject constructor(private val authRepository: Au
     fun sendPasswordResetEmail(email: String) {
         viewModelScope.launch {
             authRepository.sendPasswordResetEmail(email)
-                .collect { result ->
-                    _passwordResetResult.emit(result)
-                }
+                .collect {}
         }
     }
-
-
-
 
 }

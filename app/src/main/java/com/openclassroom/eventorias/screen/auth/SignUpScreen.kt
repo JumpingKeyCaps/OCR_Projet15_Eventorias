@@ -21,7 +21,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -84,7 +83,7 @@ fun SignUpScreen(
         //HEADER
         Column(
             modifier = Modifier
-                .padding(start = 36.dp, end = 36.dp, top = 10.dp).align(Alignment.TopCenter)
+                .padding(start = 36.dp, end = 36.dp, top = 5.dp).align(Alignment.TopCenter)
         ) {
 
             Text(text = "Sign up",
@@ -172,7 +171,7 @@ fun SignUpScreen(
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Done
                 ),
                 shape = RoundedCornerShape(8.dp)
                 )
