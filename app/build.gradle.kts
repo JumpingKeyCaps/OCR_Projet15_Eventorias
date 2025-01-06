@@ -108,7 +108,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation ("com.google.android.gms:play-services-auth")
+    implementation ("com.google.android.gms:play-services-auth:21.3.0")
 
     //firebase firestore
     implementation ("com.google.firebase:firebase-firestore-ktx:25.1.1")
@@ -118,5 +118,5 @@ dependencies {
     //accompanist
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
 
-
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
 }
