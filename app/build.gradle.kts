@@ -59,21 +59,10 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
-    //Tests
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
 
     //Compose
@@ -85,6 +74,7 @@ dependencies {
 
     //DI
     implementation(libs.hilt)
+    implementation(libs.core.ktx)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -112,11 +102,58 @@ dependencies {
 
     //firebase firestore
     implementation ("com.google.firebase:firebase-firestore-ktx:25.1.1")
+
+    //firebase storage
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.appcheck.debug)
+
+    implementation ("com.google.firebase:firebase-firestore")
+    implementation ("com.google.firebase:firebase-storage")
+
+
+    //firebase messaging FCM
+    implementation ("com.google.firebase:firebase-messaging:24.1.0")
+
+
+
     //material
     implementation ("androidx.compose.material:material:1.7.6")
 
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+
+
+
     //accompanist
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
-
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+
+    //Google Map
+    implementation ("com.google.android.gms:play-services-maps:19.0.0")
+
+
+    // ---------------TESTS
+
+    //Tests
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+
+
+
+    // JUnit (pour les tests unitaires)
+    testImplementation("junit:junit:4.13.2")
+    // Coroutines Test (pour tester les coroutines)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    // MockK (pour les mocks)
+    testImplementation("io.mockk:mockk:1.13.5")
+
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+
+
 }
