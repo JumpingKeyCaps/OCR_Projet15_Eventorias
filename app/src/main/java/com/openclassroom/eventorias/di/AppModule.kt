@@ -1,12 +1,18 @@
 package com.openclassroom.eventorias.di
 
+import android.content.Context
 import com.openclassroom.eventorias.data.repository.AuthenticationRepository
+import com.openclassroom.eventorias.data.repository.EventStoreRepository
+import com.openclassroom.eventorias.data.repository.StorageRepository
 import com.openclassroom.eventorias.data.repository.UserStoreRepository
 import com.openclassroom.eventorias.data.service.authentication.FirebaseAuthService
 import com.openclassroom.eventorias.data.service.firestore.FirestoreService
+import com.openclassroom.eventorias.data.service.storage.FirebaseStorageService
+import com.openclassroom.eventorias.notification.NotificationPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -60,6 +66,40 @@ class AppModule {
     @Singleton
     fun provideUserStoreRepository(storeService: FirestoreService): UserStoreRepository {
         return UserStoreRepository(storeService)
+    }
+
+
+
+    @Provides
+    @Singleton
+    fun provideStorageRepository(storageService: FirebaseStorageService): StorageRepository {
+        return StorageRepository(storageService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseStorageService(): FirebaseStorageService {
+        return FirebaseStorageService()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideEventStoreRepository(storeService: FirestoreService): EventStoreRepository {
+        return EventStoreRepository(storeService)
+    }
+
+
+
+    @Provides
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationPreferences(context: Context): NotificationPreferences {
+        return NotificationPreferences(context)
     }
 
 
