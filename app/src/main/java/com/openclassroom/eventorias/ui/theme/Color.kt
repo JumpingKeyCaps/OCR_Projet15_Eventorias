@@ -18,4 +18,4 @@ val eventorias_gray = Color(0xFF49454F)
 val eventorias_loading_gray = Color(0xFF9892A0)
 val eventorias_red = Color(0xFFD0021B)
 
-val eventorias_text_white = Color(0xFFFFFFFF)
+val eventorias_white = Color(0xFFFFFFFF)
