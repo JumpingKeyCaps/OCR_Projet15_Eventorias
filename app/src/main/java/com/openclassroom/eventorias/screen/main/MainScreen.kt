@@ -25,7 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -132,13 +137,20 @@ fun InnerNavigationGraph(
  */
 @Composable
 fun BottomNavigationBar(currentRoute: String?, navController: NavHostController) {
+
+    val navbarAccessibilityDescription = stringResource(id = R.string.navigationbar_contentDescription)
+
     NavigationBar(
         containerColor = eventorias_black,
         contentColor = eventorias_black,
         tonalElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .background(eventorias_black),
+            .background(eventorias_black)
+            .semantics {
+                contentDescription = navbarAccessibilityDescription
+            }
+            .testTag("BottomNavigationBar"),
     ) {
         Row(
             modifier = Modifier,
@@ -148,7 +160,9 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
             Spacer(modifier = Modifier.weight(0.30f))
             //--- Nav Item -> Events feed
             NavigationBarItem(
-                modifier = Modifier.weight(0.20f),
+                modifier = Modifier.weight(0.20f)
+                    .testTag("NavigationBarItem_EventsFeed")
+                    .semantics (mergeDescendants = true) { contentDescription = "Events feed section selector" },
                 selected = currentRoute == Screens.EventsFeed.route,
                 onClick = {
                     navController.navigate(Screens.EventsFeed.route) {
@@ -163,14 +177,16 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
                 icon = {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.baseline_event_24),
-                        contentDescription = "event icon",
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.navigationBarItem_eventsFeed_contentDescription),
+                        tint = Color.White,
+                        modifier = Modifier.clearAndSetSemantics { }
                     )
                 },
                 label = {
                     Text(
-                        text = "Events",
-                        color = Color.White
+                        text = stringResource(R.string.navigationBarItem_eventsFeed_text),
+                        color = Color.White,
+                        modifier = Modifier.clearAndSetSemantics { }
                     )
                 },
                 alwaysShowLabel = true,
@@ -184,7 +200,9 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
             )
             //--- Nav Item -> User Profile
             NavigationBarItem(
-                modifier = Modifier.weight(0.20f),
+                modifier = Modifier.weight(0.20f)
+                    .testTag("NavigationBarItem_ProfileUser")
+                    .semantics (mergeDescendants = true) { contentDescription = "User profile section selector" },
                 selected = currentRoute == Screens.UserProfile.route,
                 onClick = {
                     navController.navigate(Screens.UserProfile.route) {
@@ -196,14 +214,16 @@ fun BottomNavigationBar(currentRoute: String?, navController: NavHostController)
                 icon = {
                     Icon(
                         imageVector = Icons.Outlined.Person,
-                        contentDescription = "User profile",
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.navigationBarItem_userProfile_contentDescription),
+                        tint = Color.White,
+                        modifier = Modifier.clearAndSetSemantics { }
                     )
                 },
                 label = {
                     Text(
-                        text = "Profile",
-                        color = eventorias_white
+                        text = stringResource(R.string.navigationBarItem_userProfile_text),
+                        color = eventorias_white,
+                        modifier = Modifier.clearAndSetSemantics { }
                     )
                 },
                 alwaysShowLabel = true,
