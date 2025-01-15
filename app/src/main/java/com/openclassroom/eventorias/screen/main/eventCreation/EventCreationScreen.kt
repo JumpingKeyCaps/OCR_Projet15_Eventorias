@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,6 +74,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.firebase.auth.FirebaseAuth
+import com.openclassroom.eventorias.BuildConfig
+
 import com.openclassroom.eventorias.R
 import com.openclassroom.eventorias.ui.theme.eventorias_black
 import com.openclassroom.eventorias.ui.theme.eventorias_gray
@@ -186,9 +189,6 @@ fun EventCreationScreen(
         }
     }
 
-
-
-
     // Observer the UI state
     val uiState by viewmodel.uiState.collectAsState()
 
@@ -198,28 +198,21 @@ fun EventCreationScreen(
     // Show Snackbar based on UI state
     LaunchedEffect(uiState) {
 
-        Log.d("SAVEevent","UIstate updated ! ==> $uiState")
-
         when (val state = uiState) {
             is UiState.Error -> {
-                Log.d("SAVEevent","error msg call")
                 snackbarHostState.showSnackbar(state.message)
                 //reset UI state to idle after showing the error message
                 viewmodel.setUiStateToIdle()
             }
             is UiState.Success -> {
-                Log.d("SAVEevent","Success msg call")
                 snackbarHostState.showSnackbar(
-                    message = "Event created successfully!",
+                    message = context.getString(R.string.eventDetails_createSuccess_message),
                     duration = SnackbarDuration.Short)
                 onBackClicked()//go to main screen
             }
             else -> Unit
         }
     }
-
-
-
 
      //Coordonnées GPS (latitude, longitude)
     val coordinates = remember { mutableStateOf<Pair<Double, Double>?>(null) }
@@ -245,7 +238,6 @@ fun EventCreationScreen(
                 }
 
                 override fun onError(errorMessage: String?) {
-                    Log.e("Geocoder", "Erreur: $errorMessage")
                     onResult(null) // Retourne null en cas d'erreur
                 }
             })
@@ -264,7 +256,6 @@ fun EventCreationScreen(
                         }
                     }
                 } catch (e: IOException) {
-                    Log.e("Geocoder", "Erreur: ${e.message}")
                     withContext(Dispatchers.Main) {
                         onResult(null) // Retourne null en cas d'erreur
                     }
@@ -273,15 +264,12 @@ fun EventCreationScreen(
         }
     }
 
-// Met à jour les coordonnées quand l'adresse change
+    // Met à jour les coordonnées quand l'adresse change
     LaunchedEffect(address.value) {
         getCoordinatesFromAddress(address.value) { result ->
             coordinates.value = result
         }
     }
-
-
-
 
 
     //COMPO PRINCIPAL #############################################################
@@ -300,7 +288,7 @@ fun EventCreationScreen(
                         fontSize = 20.sp)
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClicked) {
+                    IconButton(onClick = onBackClicked,modifier = Modifier.testTag("EventCreationScreen_BackButton")) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -339,13 +327,15 @@ fun EventCreationScreen(
                     value = title.value,
                     onValueChange = { title.value = it },
                     colors = textFieldColors,
-                    placeholderText = "New event")
+                    placeholderText = "New event",
+                    modifier = Modifier.testTag("EventCreationScreen_titleInput"))
                 EventTextField(
                     label = "Description",
                     value = description.value,
                     onValueChange = { description.value = it },
                     colors = textFieldColors,
-                    placeholderText = "Tap here to enter your description")
+                    placeholderText = "Tap here to enter your description",
+                    modifier = Modifier.testTag("EventCreationScreen_DescriptionInput"))
 
                 // Date and Time picker row
                 Row(
@@ -362,7 +352,8 @@ fun EventCreationScreen(
                     value = address.value,
                     onValueChange = { address.value = it },
                     colors = textFieldColors,
-                    placeholderText = "Enter full address")
+                    placeholderText = "Enter full address",
+                    modifier = Modifier.testTag("EventCreationScreen_AddressInput"))
 
 
                 // Afficher la carte statique si les coordonnées sont disponibles
@@ -381,9 +372,6 @@ fun EventCreationScreen(
                     )
                 }
 
-
-
-
                 // Photo and Picture attachments pickers
                 Row(
                     modifier = Modifier
@@ -398,7 +386,8 @@ fun EventCreationScreen(
                             handleCameraClick()
                         },
                         modifier = Modifier
-                            .size(52.dp), // Taille fixe pour le bouton
+                            .size(52.dp)
+                            .testTag("EventCreationScreen_CameraButton"),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
@@ -419,7 +408,8 @@ fun EventCreationScreen(
                             imagePickerLauncher.launch("image/*")
                         },
                         modifier = Modifier
-                            .size(52.dp), // Taille fixe pour le bouton
+                            .size(52.dp)
+                            .testTag("EventCreationScreen_GalleryButton"),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = eventorias_red,
@@ -467,8 +457,9 @@ fun EventCreationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(start = 16.dp, end = 16.dp, bottom = 0.dp)
-                    .height(52.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 3.dp)
+                    .height(55.dp)
+                    .testTag("EventCreationScreen_SubmitButton"),
                 shape = RoundedCornerShape(6.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if(uiState !is UiState.Loading) eventorias_red else eventorias_gray,
@@ -478,14 +469,16 @@ fun EventCreationScreen(
                 if (uiState is UiState.Loading) {
                     // Afficher le Progress Indicator pendant le chargement
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),  // Taille du progress indicator
+                        modifier = Modifier.size(24.dp),
                         color = Color.White
                     )
                 } else {
                     // Afficher le texte quand ce n'est pas en cours de chargement
-                    Text(text = "Validate")
+                    Text(text = stringResource(R.string.eventDetails_validate_txt))
                 }
             }
+
+
 
         }
     }
@@ -498,7 +491,7 @@ fun EventCreationScreen(
 // Fonction pour générer l'URL de la carte statique
 @Composable
 fun generateStaticMapUrl(lat: Double, lon: Double): String {
-    val apiKey = stringResource(id = R.string.google_maps_api_key)
+    val apiKey = BuildConfig.MAPS_API_KEY
     return "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lon&zoom=15&size=600x300&markers=$lat,$lon&key=$apiKey"
 }
 
@@ -542,13 +535,14 @@ fun EventTextField(
     value: String,
     onValueChange: (String) -> Unit,
     colors: TextFieldColors,
-    placeholderText: String) {
+    placeholderText: String,
+    modifier: Modifier = Modifier) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         placeholder = { Text(placeholderText) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = colors,
         shape = RoundedCornerShape(4.dp)
     )
@@ -595,7 +589,8 @@ fun DatePickerField(state: MutableState<String>, context: Context, colors: TextF
             }) {
                 Icon(imageVector = Icons.Default.DateRange,
                     contentDescription = "Select Date",
-                    tint = eventorias_loading_gray)
+                    tint = eventorias_loading_gray,
+                    modifier = Modifier.testTag("EventCreationScreen_DateInput"))
             }
         }
     )
@@ -635,7 +630,8 @@ fun TimePickerField(state: MutableState<String>, context: Context, colors: TextF
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_event_time_24),
                     contentDescription = "Select Time",
-                    tint = eventorias_loading_gray
+                    tint = eventorias_loading_gray,
+                    modifier = Modifier.testTag("EventCreationScreen_TimeInput")
                 )
             }
         }
