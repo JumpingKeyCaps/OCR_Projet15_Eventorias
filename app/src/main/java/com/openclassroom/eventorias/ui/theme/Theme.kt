@@ -1,13 +1,16 @@
 package com.openclassroom.eventorias.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -29,14 +32,6 @@ private val LightColorScheme = lightColorScheme(
     surface = eventorias_black,
     onSurface = eventorias_black
 
-    /* Other default colors to override
-
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
 )
 
 @Composable
@@ -46,15 +41,21 @@ fun EventoriasTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicDarkColorScheme(context)
-        }
 
-        //TODO - On force le darktheme pour le momement !
+    val systemUiController = rememberSystemUiController()
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S  -> {
+            val context = LocalContext.current
+            dynamicDarkColorScheme(context)
+        }
         darkTheme -> DarkColorScheme
-        else -> DarkColorScheme //LightColorScheme
+        else -> DarkColorScheme
+    }
+
+    LaunchedEffect(darkTheme) {
+        systemUiController.setSystemBarsColor(
+            color = DarkColorScheme.background
+        )
     }
 
     MaterialTheme(

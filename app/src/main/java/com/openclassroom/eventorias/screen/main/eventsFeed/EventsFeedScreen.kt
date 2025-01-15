@@ -68,7 +68,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -132,7 +137,6 @@ fun EventsFeedScreen(
     LaunchedEffect(searchQuery) {
         debounceQuery.value = searchQuery
         delay(250) // délai de 500ms
-        Log.d("DebouncedQuery", " Current Qwery : ${debounceQuery.value}")
         viewModel.updateSortFilteredEvents(debounceQuery.value)
     }
 
@@ -166,8 +170,6 @@ fun EventsFeedScreen(
 
 
 
-
-
     Scaffold(
         topBar = {
             // EVENTS FEED SCREEN TOPBAR
@@ -175,7 +177,7 @@ fun EventsFeedScreen(
                 title = {
                     if (!isSearchActive) {
                         Text(
-                            text = "Event list",
+                            text = stringResource(R.string.eventsFeed_topBar_title),
                             color = eventorias_white,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
@@ -198,46 +200,43 @@ fun EventsFeedScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(eventorias_black),
                 actions = {
-                    // Afficher les boutons d'action uniquement si la recherche n'est pas active
+                    val eventsFeedTopBarSearchContentDescription = stringResource(R.string.eventsFeed_topBar_search_contentDescription)
+
                     if(!isSearchActive){
-                        IconButton(onClick = { isSearchActive = !isSearchActive }) {
-                            Icon(Icons.Filled.Search, contentDescription = "Rechercher", tint = Color.White)
+                        IconButton(onClick = { isSearchActive = !isSearchActive },
+                            modifier = Modifier.semantics { contentDescription = eventsFeedTopBarSearchContentDescription}
+                        ) {
+                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.eventsFeed_topBar_searchIcon_contentDescription), tint = Color.White)
                         }
                     }
 
-                    //bouton de tri
+                    //sort button
                     Box {
+                        val eventsFeedTopBarSortContentDescription = stringResource(R.string.eventsFeed_topBar_sort_contentDescription)
                         IconButton(onClick = {
                             //change the date order sorting
                             viewModel.setDateSortingType(!dateSortingType)
 
-                        }) {
+                        },
+                            modifier = Modifier.semantics { contentDescription = eventsFeedTopBarSortContentDescription }
+                        ) {
                             Icon(
                                 ImageVector.vectorResource(id = R.drawable.baseline_swap_vert_24),
-                                contentDescription = "Notifications",
+                                contentDescription = stringResource(R.string.eventsFeed_topBar_sortIcon_contentDescription),
                                 tint = Color.White
                             )
                         }
-
-
-
                     }
-
-
-
-
                 }
             )
         },
         floatingActionButton = {
-
             CreateEventFloatingButton(
                 modifier = Modifier.padding(bottom = 56.dp),
                 onFabClicked = onCreateEventClicked)
-
         },
         content = { padding ->
-            // Afficher la liste des événements
+            // Show the events list
             Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -248,10 +247,13 @@ fun EventsFeedScreen(
                 contentAlignment = Alignment.Center) {
                 when (eventsFeedState) {
                     is EventsFeedState.Loading -> {
+                        val eventsFeedLoadingContentDescription = stringResource(R.string.eventsFeed_loading_contentDescription)
                         CircularProgressIndicator(
                             color = Color.White,
                             trackColor = eventorias_loading_gray,
-                            strokeWidth = 4.dp
+                            strokeWidth = 4.dp,
+                            modifier = Modifier.semantics { contentDescription = eventsFeedLoadingContentDescription}
+
                         )
                     }
 
@@ -263,25 +265,26 @@ fun EventsFeedScreen(
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_error_24), // Remplace avec ton icône d'erreur si besoin
-                                contentDescription = "Error",
+                                contentDescription = stringResource(R.string.eventsFeed_error_icon_contentDescription),
                                 tint = eventorias_gray,
                                 modifier = Modifier.size(64.dp)
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Error",
+                                text = stringResource(R.string.eventsFeed_error_title_text),
                                 color = Color.White,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "An error has occurred,\nplease try again later.",
+                                text = stringResource(R.string.eventsFeed_error_main_text),
                                 color = Color.Gray,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Spacer(modifier = Modifier.height(22.dp))
+                            val eventsFeedErrorRetryContentDescription = stringResource(R.string.eventsFeed_error_retry_contentDescription)
                             Button(
                                 onClick = { viewModel.observeEvents() },
                                 colors = ButtonDefaults.buttonColors(
@@ -292,8 +295,12 @@ fun EventsFeedScreen(
                                 modifier = Modifier
                                     .width(159.dp)
                                     .height(40.dp)
+                                    .semantics {
+                                        contentDescription = eventsFeedErrorRetryContentDescription
+                                    }
+
                             ) {
-                                Text("Try again")
+                                Text(stringResource(R.string.eventsFeed_error_retry_text))
                             }
                         }
                     }
@@ -318,13 +325,13 @@ fun EventsFeedScreen(
                                         //Deco doodle empty search result !
                                         Image(
                                             painter = painterResource(id = R.drawable.search_doodle),
-                                            contentDescription = "Doodle No events found",
+                                            contentDescription = stringResource(R.string.eventsFeed_noEventsFoundImage_contentDescription),
                                             modifier = Modifier
                                                 .size(200.dp)
                                                 .align(Alignment.CenterHorizontally)
                                         )
                                         Text(
-                                            text = "No events found",
+                                            text = stringResource(R.string.eventsFeed_no_events_found_text),
                                             color = Color.White,
                                             style = MaterialTheme.typography.bodyLarge,
                                             textAlign = TextAlign.Center,
@@ -354,22 +361,17 @@ fun EventsFeedScreen(
                                     items(filteredEvents, key = { event -> event.id }) { event -> // Utilisation de l'ID comme clé unique
                                         EventItem(
                                             event = event,
-                                            onClick = { onEventClicked(event) }
+                                            onClick = { onEventClicked(event) },
                                         )
                                     }
-
                                 }
-
                             }
-
                         }
                     }
                 }
             }
         }
     )
-
-
 }
 
 
@@ -432,7 +434,7 @@ fun EventItem(
                         placeholder = painterResource(id = R.drawable.placeholder_profile),
                         error = painterResource(id = R.drawable.placeholder_profile)
                     ),
-                    contentDescription = "Author profile picture",
+                    contentDescription = stringResource(R.string.eventItem_AuthorPicture_contentDescription),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .height(40.dp)
@@ -440,6 +442,7 @@ fun EventItem(
                         .clip(CircleShape)
                         .align(Alignment.Center)
                         .graphicsLayer { alpha = imageAlpha }
+                        .clearAndSetSemantics { }
 
                 )
             }
@@ -457,21 +460,28 @@ fun EventItem(
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.semantics (mergeDescendants = true){
+                        heading()
+                        contentDescription = event.title
+                    }
 
-                    )
+
+                )
 
                 Text(
                     text = event.date.toFormattedDate(),
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 3.dp),
+                    modifier = Modifier
+                        .padding(top = 3.dp)
+                        .semantics {
+                            contentDescription = event.date.toFormattedDate()
+                        } ,
                     maxLines = 1
+
                 )
 
             }
             //picture
-
-
-
             Image(
                 painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -489,7 +499,7 @@ fun EventItem(
                         }
                     }
                 ),
-                contentDescription = "Event picture",
+                contentDescription = stringResource(R.string.eventItem_event_picture_contentDescription),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
@@ -498,14 +508,10 @@ fun EventItem(
                     .padding(start = 0.dp)
                     .weight(0.40f)
                     .graphicsLayer { alpha = imageAlpha }
+                    .clearAndSetSemantics { }
             )
-
-
         }
-
-
     }
-
 }
 
 
@@ -525,7 +531,7 @@ fun EventSearchBar(
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChanged,
-                placeholder = { Text("Search an event...", fontSize = 16.sp, color = Color.Gray) },
+                placeholder = { Text(stringResource(R.string.eventSearchBar_placeholderText), fontSize = 16.sp, color = Color.Gray) },
                 maxLines = 1,
                 singleLine = true,
                 textStyle = TextStyle(
@@ -533,7 +539,7 @@ fun EventSearchBar(
                     color = Color.White // Couleur du texte
                 ),
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.eventSearchBar_leadIcon_contentDescription))
                 },
 
                 trailingIcon = {
@@ -542,7 +548,7 @@ fun EventSearchBar(
                         onCloseBar()
 
                     }) {
-                        Icon(Icons.Default.Close, contentDescription = "Close Search")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.eventSearchBar_TrailIcon_contentDescription))
                     }
                 },
                 colors = TextFieldDefaults.colors(
@@ -594,7 +600,7 @@ fun CreateEventFloatingButton(onFabClicked: () -> Unit,modifier: Modifier ) {
             containerColor = authentication_red,
             contentColor = Color.White
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add an event")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.createEventFloatingButton_contentDescription))
         }
     }
 }
