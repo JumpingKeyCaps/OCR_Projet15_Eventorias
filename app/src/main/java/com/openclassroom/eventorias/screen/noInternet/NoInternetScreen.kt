@@ -33,6 +33,7 @@ import com.openclassroom.eventorias.ui.theme.eventorias_white
 fun NoInternetScreen() {
 
     val accessibilityScreenDescription = stringResource(id = R.string.no_internet_screen_description)
+    val accessibilityContentDescription = stringResource(id = R.string.no_internet_secondary_text)
 
     Box(
         modifier = Modifier
@@ -84,7 +85,10 @@ fun NoInternetScreen() {
                 color = eventorias_white,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                modifier = Modifier.padding(0.dp)
+                modifier =  Modifier.padding(0.dp)
+                .semantics {
+                    contentDescription = accessibilityContentDescription
+                }
             )
         }
     }
