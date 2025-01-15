@@ -1,14 +1,36 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
+
     namespace = "com.openclassroom.eventorias"
     compileSdk = 34
+
+
+    val secretPropertiesFile = rootProject.file("secrets.properties")
+    if (secretPropertiesFile.exists()) {
+        val properties = Properties().apply {
+            load(secretPropertiesFile.inputStream())
+        }
+        signingConfigs {
+            create("release") {
+                storeFile = file(properties.getProperty("KEYSTORE_FILE"))
+                storePassword =  properties.getProperty("KEYSTORE_PASSWORD")
+                keyAlias = properties.getProperty("KEY_ALIAS")
+                keyPassword = properties.getProperty("KEY_PASSWORD")
+            }
+        }
+    } else { throw GradleException("secrets.properties file not found. Please ensure it's present in the project root.") }
+
+
 
     defaultConfig {
         applicationId = "com.openclassroom.eventorias"
@@ -16,12 +38,12 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.openclassroom.eventorias.TestConfig.CustomTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
     }
+
 
     buildTypes {
         release {
@@ -30,6 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false
@@ -43,16 +66,25 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+        resources.excludes.addAll(listOf("/META-INF/{AL2.0,LGPL2.1}","/META-INF/LICENSE.md","/META-INF/LICENSE-notice.md"))
+
     }
+
+    secrets {
+
+        propertiesFileName = "secrets.properties"
+        defaultPropertiesFileName = "local.properties"
+
+    }
+
+
 }
 
 dependencies {
@@ -75,6 +107,8 @@ dependencies {
     //DI
     implementation(libs.hilt)
     implementation(libs.core.ktx)
+    implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.junit.ktx)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -135,14 +169,44 @@ dependencies {
     // ---------------TESTS
 
     //Tests
-    testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+
+
+
+    //hilt tests
+    androidTestImplementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.51.1")
+
+
+    androidTestImplementation("io.mockk:mockk-android:1.13.3")
+    androidTestImplementation("io.mockk:mockk:1.13.3")
+
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.6")
+    androidTestImplementation ("androidx.compose.ui:ui-tooling:1.7.6")
+    androidTestImplementation ("androidx.compose.ui:ui-test:1.7.6")
+    debugImplementation ("androidx.compose.ui:ui-test-manifest:1.7.6")
+    debugImplementation ("androidx.compose.ui:ui-tooling:1.7.6")
+
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+
+
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+
+
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+
+    testImplementation(libs.junit)
 
 
 

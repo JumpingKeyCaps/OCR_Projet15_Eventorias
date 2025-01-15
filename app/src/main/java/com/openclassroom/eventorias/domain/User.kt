@@ -1,5 +1,6 @@
 package com.openclassroom.eventorias.domain
 
+import androidx.annotation.Keep
 import java.io.Serializable
 
 /**
@@ -11,6 +12,7 @@ import java.io.Serializable
  * @property email the user email
  * @property pictureURL the user picture URL
  */
+@Keep
 data class User(
     val id: String = "",
     val firstname: String = "",

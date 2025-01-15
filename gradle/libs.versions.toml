@@ -12,7 +12,7 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.12.01"
 ksp = "1.9.23-1.0.20"
-hilt = "2.49"
+hilt = "2.51.1"
 coilCompose = "2.6.0"
 accompanistPager = "0.32.0"
 accompanistPermissions = "0.34.0"
@@ -21,6 +21,8 @@ firebaseAuthKtx = "23.1.0"
 firebaseStorageKtx = "21.0.1"
 firebaseAppcheckDebug = "18.0.0"
 coreKtxVersion = "1.6.1"
+navigationTesting = "2.8.5"
+junitKtx = "1.2.1"
 
 
 [libraries]
@@ -54,6 +56,8 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppcheckDebug" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 
 
 [plugins]

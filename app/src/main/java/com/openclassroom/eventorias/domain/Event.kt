@@ -1,5 +1,6 @@
 package com.openclassroom.eventorias.domain
 
+import androidx.annotation.Keep
 import java.io.Serializable
 
 /**
@@ -16,6 +17,7 @@ import java.io.Serializable
  * @property authorId The ID of the event's author.
  * @property authorPictureURL The URL of the event's author's picture.
  */
+@Keep
 data class Event (
     val id: String = "",
     val title: String = "",
