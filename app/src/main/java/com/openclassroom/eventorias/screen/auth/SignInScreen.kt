@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -101,6 +103,9 @@ fun SignInScreen(
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 fontSize = 26.sp,
+                modifier = Modifier
+                    .testTag("authentication_SignInScreen_header_1")
+                    .semantics { contentDescription = "Header text: Sign in to your account" }
             )
 
             Text(text = "with your e-mail address ",
@@ -108,6 +113,10 @@ fun SignInScreen(
                 color = Color.Gray,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(0.dp,0.dp,0.dp,0.dp)
+                    .testTag("authentication_SignInScreen_header_2")
+                    .semantics {
+                        contentDescription = "Subtitle text: with your email address"
+                    }
             )
 
 
@@ -126,7 +135,7 @@ fun SignInScreen(
             //Deco doodle
             Image(
                 painter = painterResource(id = R.drawable.authentication_rafiki_doodle),
-                contentDescription = "Doodle sign in",
+                contentDescription = "Doodle sign in image",
                 modifier = Modifier.size(200.dp)
                     .align(Alignment.CenterHorizontally)
             )
@@ -150,7 +159,9 @@ fun SignInScreen(
 
                 singleLine = true,
                 maxLines = 1,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .semantics { contentDescription = "Email input field" }
+                    .testTag("authentication_SignInScreen_EmailInput"),
                 textStyle = TextStyle(color = Color.White),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email,
@@ -175,7 +186,9 @@ fun SignInScreen(
                 },
                 singleLine = true,
                 maxLines = 1,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().semantics {
+                    contentDescription = "Password input field"
+                }.testTag("authentication_SignInScreen_PasswordInput"),
                 textStyle = TextStyle(color = Color.White),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -192,6 +205,8 @@ fun SignInScreen(
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.clickable { onLostPassword(email) }.align(Alignment.End)
+                    .semantics { contentDescription = "Forgot password link" }
+                    .testTag("authentication_SignInScreen_ForgotPassword")
             )
 
 
@@ -211,7 +226,8 @@ fun SignInScreen(
                         onSignIn(email, password)
                     }
                 },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .testTag("authentication_SignInScreen_SignInButton"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if(signInButtonState)authentication_red else Color.DarkGray, // Fond du bouton
                     contentColor = Color.White // Texte en noir
@@ -221,7 +237,8 @@ fun SignInScreen(
                     Text(text = "Sign In")
                 } else {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp), // Taille de la barre
+                        modifier = Modifier.size(24.dp)
+                            .testTag("authentication_SignInScreen_circularProgressIndicator"),
                         color = Color.White, // Couleur de la barre
                         strokeWidth = 2.dp // Largeur du trait
                     )
@@ -234,14 +251,20 @@ fun SignInScreen(
                     text = "Don't have an account?",
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.clickable { onClickGoSignUp() }.align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .clickable { onClickGoSignUp() }
+                        .align(Alignment.CenterVertically)
+                        .testTag("authentication_SignInScreen_GoSignUp_A")
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
                     text = "Let's Create one !",
                     color = Purple40,
                     style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.clickable { onClickGoSignUp() }.align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .clickable { onClickGoSignUp() }
+                        .align(Alignment.CenterVertically)
+                        .testTag("authentication_SignInScreen_GoSignUp_B")
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
