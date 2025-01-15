@@ -16,3 +16,4 @@ local.properties
 secrets.properties
 /keystores/
 *.jks
+.idea
