@@ -3,7 +3,6 @@ package com.openclassroom.eventorias.screen.main.eventDetails
 import android.location.Address
 import android.location.Geocoder
 import android.os.Build
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -50,8 +49,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,6 +80,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 
@@ -131,7 +136,6 @@ fun EventDetailsScreen(
                 }
 
                 override fun onError(errorMessage: String?) {
-                    Log.e("Geocoder", "Erreur: $errorMessage")
                     onResult(null)
                 }
             })
@@ -148,7 +152,6 @@ fun EventDetailsScreen(
                         }
                     }
                 } catch (e: IOException) {
-                    Log.e("Geocoder", "Erreur: ${e.message}")
                     withContext(Dispatchers.Main) {
                         onResult(null)
                     }
@@ -161,7 +164,7 @@ fun EventDetailsScreen(
     val detailsImageLoaded = remember { mutableStateOf(false) }
     val detailsImageHeight by animateDpAsState(
         targetValue = if (detailsImageLoaded.value) 349.dp else 1.dp, // Animation de la hauteur
-        animationSpec = tween(durationMillis = 1000) // Durée de l'animation
+        animationSpec = tween(durationMillis = 1000), label = "" // Durée de l'animation
     )
 
     // event charged
@@ -178,7 +181,7 @@ fun EventDetailsScreen(
         val participateValueIsLoaded = remember { mutableStateOf(false) }
         val participateButtonOffsetY by animateDpAsState(
         targetValue = if (participateValueIsLoaded.value) 0.dp else 500.dp,
-        animationSpec = tween(durationMillis = 2000) // Durée de l'animation
+        animationSpec = tween(durationMillis = 4000), label = "" // Durée de l'animation
         )
         userParticipation.let {
             participateValueIsLoaded.value = true
@@ -188,14 +191,14 @@ fun EventDetailsScreen(
         val mapImageLoaded = remember { mutableStateOf(false) }
         val mapImageOffsetX by animateDpAsState(
             targetValue = if (mapImageLoaded.value) 0.dp else 500.dp, // L'image commence à 500.dp à droite, et glisse à 0.dp
-            animationSpec = tween(durationMillis = 1500) // Durée de l'animation
+            animationSpec = tween(durationMillis = 1500), label = "" // Durée de l'animation
         )
 
         // State to detect if the author image is loaded
         val authorImageLoaded = remember { mutableStateOf(false) }
         val authorImageAlpha by animateFloatAsState(
             targetValue = if (authorImageLoaded.value) 1f else 0f,
-            animationSpec = tween(durationMillis = 1000)
+            animationSpec = tween(durationMillis = 1000), label = ""
         )
 
         Scaffold(
@@ -203,21 +206,26 @@ fun EventDetailsScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = event.title, // Titre de l'événement
+                            text = event.title,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = eventorias_white,
                             fontSize = 20.sp,
-                            modifier = Modifier.padding(start = 8.dp, end = 28.dp),
+                            modifier = Modifier
+                                .testTag("EventDetails_Title")
+                                .padding(start = 8.dp, end = 28.dp)
+                                .semantics { contentDescription = "Event Title: ${event.title}" },
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = onBackClicked) {
+                        IconButton(onClick = onBackClicked,
+                        modifier = Modifier.semantics { contentDescription = "Back Button"}
+                            .testTag("Back_Button")) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.eventDetails_gobackIcon_contentDescription),
                                 tint = eventorias_white
                             )
                         }
@@ -261,12 +269,14 @@ fun EventDetailsScreen(
                                 }
                             }
                         ),
-                        contentDescription = "Event picture",
+                        contentDescription = stringResource(R.string.eventDetails_eventPicture_contentDescription),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
                             .height(detailsImageHeight)
                             .clip(RoundedCornerShape(12.dp))
+                            .semantics { contentDescription = "Event picture: ${event.title}" }
+
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -287,7 +297,7 @@ fun EventDetailsScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Date Icon",
+                                    contentDescription = stringResource(R.string.eventDetails_dateIcon_contentDescription),
                                     tint = eventorias_white,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -295,7 +305,10 @@ fun EventDetailsScreen(
                                 Text(
                                     text = event.date.toFormattedDate(), // Date de l'événement
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Event date: ${event.date.toFormattedDate()}" }
+                                        .testTag("EventDetails_Date")
                                 )
                             }
 
@@ -305,7 +318,7 @@ fun EventDetailsScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     painter =  painterResource(id = R.drawable.baseline_event_time_24),
-                                    contentDescription = "Time Icon",
+                                    contentDescription = stringResource(R.string.eventDetails_timeIcon_contentDescription),
                                     tint = eventorias_white,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -313,7 +326,10 @@ fun EventDetailsScreen(
                                 Text(
                                     text = event.time.toFormattedTime(), // Heure de l'événement
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Event time: ${event.time.toFormattedTime()}" }
+                                        .testTag("EventDetails_Time")
                                 )
                             }
 
@@ -332,7 +348,8 @@ fun EventDetailsScreen(
                                 Text(
                                     text = "${event.participants.size} participants",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.semantics { contentDescription = "${event.participants.size} participants in this event" }
                                 )
                             }
                         }
@@ -357,13 +374,13 @@ fun EventDetailsScreen(
                                     }
                                 }
                             ),
-                            contentDescription = "Event picture",
+                            contentDescription = stringResource(R.string.eventDetails_eventAuthorPicture_contentDescription),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .size(60.dp)
                                 .clip(CircleShape)
-                                .graphicsLayer { alpha = authorImageAlpha },
+                                .graphicsLayer { alpha = authorImageAlpha }
                         )
                     }
 
@@ -373,7 +390,10 @@ fun EventDetailsScreen(
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .semantics { contentDescription = "Event description: ${event.description}" }
+                            .testTag("EventDetails_Description")
                     )
 
                     Spacer(modifier = Modifier.height(26.dp))
@@ -401,7 +421,13 @@ fun EventDetailsScreen(
                                 text = event.location,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = eventorias_white,
-                                modifier = Modifier.align(Alignment.Center)
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .semantics {
+                                        contentDescription = "Event location: ${event.location}"
+                                    }
+                                    .testTag("EventDetails_Location")
+
                             )
                         }
 
@@ -430,7 +456,7 @@ fun EventDetailsScreen(
                                             }
                                         }
                                     ),
-                                    contentDescription = "Map Image",
+                                    contentDescription = stringResource(R.string.eventDetails_location_map_contentDescription),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(92.dp)
@@ -444,41 +470,66 @@ fun EventDetailsScreen(
 
                     Spacer(modifier = Modifier.height(56.dp))
 
-                    Button(
-                        onClick = {
-                            if(currentAuthUser != null){
-                                if (userParticipation) {
-                                    // remove the user to event participation
-                                    viewmodel.leaveEvent(userId = currentAuthUser.uid, eventId = eventId)
-                                } else {
-                                    // set the user participating to event
-                                    viewmodel.participateInEvent(userId = currentAuthUser.uid, eventId = eventId)
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(35.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if(userParticipation) eventorias_gray else eventorias_red,
-                            contentColor = eventorias_white,
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 26.dp, start = 26.dp,bottom = 26.dp)
-                            .height(52.dp)
-                            .graphicsLayer {
-                                translationY = participateButtonOffsetY.toPx()
-                            },
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp) // Espacement entre l'icône et le texte
-                        ) {
-                            Text(
-                                text = if (userParticipation) "Leave this event" else "Participate",
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
+                    val participateButtonContentDescription = if (userParticipation) stringResource(R.string.eventDetails_leave_the_event_text)
+                    else stringResource(R.string.eventDetails_participate_the_event_text)
+
+
+                    val participateButtonVisibility = remember { mutableStateOf(true) }
+                    if(event.date.isNotBlank()){
+                        val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                        val eventDate: Date = dateFormat.parse(event.date) ?: Date(0) // Utiliser Date(0) si la conversion échoue
+                        val currentDate = Date()
+                        participateButtonVisibility.value = !eventDate.before(currentDate)
+                    }else{
+                        participateButtonVisibility.value = true
                     }
+
+                    //check if event is not finished to show participate button
+                    if(participateButtonVisibility.value){
+                        Button(
+                            onClick = {
+                                if(currentAuthUser != null){
+                                    if (userParticipation) {
+                                        // remove the user to event participation
+                                        viewmodel.leaveEvent(userId = currentAuthUser.uid, eventId = eventId)
+                                    } else {
+                                        // set the user participating to event
+                                        viewmodel.participateInEvent(userId = currentAuthUser.uid, eventId = eventId)
+                                    }
+                                }
+                            },
+                            shape = RoundedCornerShape(35.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if(userParticipation) eventorias_gray else eventorias_red,
+                                contentColor = eventorias_white,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 26.dp, start = 26.dp, bottom = 26.dp)
+                                .height(52.dp)
+                                .graphicsLayer {
+                                    translationY = participateButtonOffsetY.toPx()
+                                }
+                                .semantics {
+                                    contentDescription = participateButtonContentDescription
+                                }
+                                .testTag("Participate_Button")
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp) // Espacement entre l'icône et le texte
+                            ) {
+                                Text(
+                                    text = if (userParticipation) stringResource(R.string.eventDetails_leave_the_event_text) else stringResource(R.string.eventDetails_participate_the_event_text),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                        }
+
+
+                    }
+
+
                 }
             }
         }
