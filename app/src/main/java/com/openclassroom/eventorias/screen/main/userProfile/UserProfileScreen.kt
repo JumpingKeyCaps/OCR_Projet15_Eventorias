@@ -44,6 +44,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,6 +56,7 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseUser
+import com.openclassroom.eventorias.R
 import com.openclassroom.eventorias.ui.theme.eventorias_black
 import com.openclassroom.eventorias.ui.theme.eventorias_gray
 import com.openclassroom.eventorias.ui.theme.eventorias_loading_gray
@@ -119,6 +124,9 @@ fun UserProfileScreen(
     var showLogOutDialog by remember { mutableStateOf(false) }
     //Result of sign out from viewmodel
     val signOutResult by viewModel.signOutResult.collectAsStateWithLifecycle(null)
+
+    val logoutFailedMessage = stringResource(id = R.string.logout_failed_message)
+
     //Check if the sign out result indicates success or failure
     LaunchedEffect(signOutResult) {
         signOutResult?.onSuccess {
@@ -126,7 +134,7 @@ fun UserProfileScreen(
             onLogOutAction()
         }?.onFailure {
             // show message to user for the sign out failure
-            snackBarHostState.showSnackbar("Logout failed, please try again.")
+            snackBarHostState.showSnackbar(logoutFailedMessage)
         }
     }
 
@@ -135,13 +143,15 @@ fun UserProfileScreen(
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     //Result of delete account from viewmodel
     val deleteUserAccountResult by viewModel.deleteAccountResult.collectAsStateWithLifecycle(null)
+
+    val deleteAccountFailedMessage = stringResource(id = R.string.deleteAccount_failed_message)
     //check account deletion result success or failure
     LaunchedEffect(deleteUserAccountResult){
         deleteUserAccountResult?.onSuccess {
-            // go to autentification screen.
+            // go to authentication screen.
             onLogOutAction()
         }?.onFailure {
-            snackBarHostState.showSnackbar("Account deletion failed, please try again.")
+            snackBarHostState.showSnackbar(deleteAccountFailedMessage)
         }
     }
 
@@ -176,10 +186,12 @@ fun UserProfileScreen(
         },
         content = { padding ->
             // content root
-            Box(modifier = Modifier.fillMaxSize()
+            Box(modifier = Modifier
+                .fillMaxSize()
                 .padding(
                     top = padding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding()),
+                    bottom = innerPadding.calculateBottomPadding()
+                ),
                 contentAlignment = Alignment.TopCenter) {
 
                 //--- User Profile content
@@ -190,25 +202,39 @@ fun UserProfileScreen(
                         .align(Alignment.TopCenter),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    val loadingText = stringResource(id = R.string.userProfile_loadingMessage)
+                    val userNameContentDescription = stringResource(id = R.string.userProfile_name_contentDescription)
+                    val userEmailAddressContentDescription = stringResource(id = R.string.userProfile_email_contentDescription)
+
                     //Field for the user's name
                     TextField(
-                        value = if(currentUser!=null)"${currentUser?.firstname} ${currentUser?.lastname}" else " loading ...",
+                        value = if(currentUser!=null)"${currentUser?.firstname} ${currentUser?.lastname}" else loadingText,
                         onValueChange = {},
-                        label = { Text("Name") },
+                        label = { Text(stringResource(R.string.userProfile_name_field)) },
                         textStyle = TextStyle(color = Color.White),
                         readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = userNameContentDescription
+                            }
+                            .testTag("user_name"),
                         colors = textFieldsColors,
                         shape = RoundedCornerShape(4.dp)
                     )
                     //Field for the email.
                     TextField(
-                        value = currentUser?.email ?: "loading ...",
+                        value = currentUser?.email ?: loadingText,
                         onValueChange = { },
-                        label = { Text("Email") },
+                        label = { Text(stringResource(R.string.userProfile_email_field)) },
                         readOnly = true,
                         textStyle = TextStyle(color = Color.White),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = userEmailAddressContentDescription
+                            }
+                            .testTag("user_mail"),
                         colors = textFieldsColors,
                         shape = RoundedCornerShape(4.dp)
                     )
@@ -219,6 +245,8 @@ fun UserProfileScreen(
                             .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
+                        val notificationsContentDescription = stringResource(id = R.string.userProfile_notifications_contentDescription)
                         Switch(
                             checked = notificationsEnabled,
                             onCheckedChange = {
@@ -234,10 +262,17 @@ fun UserProfileScreen(
                                 uncheckedThumbColor = Color.Gray,
                                 checkedTrackColor = eventorias_red,
                                 uncheckedTrackColor = Color.Gray.copy(alpha = 0.5f)),
-                            modifier = Modifier.width(40.dp).height(24.dp).padding(start = 0.dp, end = 16.dp)
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(24.dp)
+                                .padding(start = 0.dp, end = 16.dp)
+                                .semantics {
+                                    contentDescription = notificationsContentDescription
+                                }
+                                .testTag("notifications_switch")
                         )
                         Text(
-                            text = "Notifications",
+                            text = stringResource(R.string.userProfile_notification_switch),
                             modifier = Modifier.padding(start = 10.dp)
                         )
                     }
@@ -245,48 +280,63 @@ fun UserProfileScreen(
 
                 //--- Sign out and Delete Account buttons
                 Column(
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
                         .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
                     // Button to log out
+                    val signOutContentDescription = stringResource(id = R.string.userProfile_signout_contentDescription)
                     Button(
                         onClick = {
-                            //show confirme dialog
+                            //show confirm dialog
                             showLogOutDialog = true
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .height(52.dp)
-                            .padding(start = 16.dp, end = 16.dp),
+                            .padding(start = 16.dp, end = 16.dp)
+                            .semantics {
+                                contentDescription = signOutContentDescription
+                            }
+                            .testTag("logOut_account_button"),
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = eventorias_red,
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Sign out")
+                        Text(stringResource(R.string.userProfile_signOut_buttonText))
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Button to delete account
+                    val deleteAccountContentDescription = stringResource(id = R.string.userProfile_deleteAccount_contentDescription)
                     Button(
                         onClick = {
                             showDeleteAccountDialog = true
                         },
-                        modifier =Modifier.fillMaxWidth().height(52.dp)
-                            .padding(start = 16.dp, end = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .padding(start = 16.dp, end = 16.dp)
+                            .semantics {
+                                contentDescription = deleteAccountContentDescription
+                            }
+                            .testTag("delete_account_button"),
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = eventorias_gray,
                             contentColor = eventorias_loading_gray
                         )
                     ) {
-                        Text("Delete account")
+                        Text(stringResource(R.string.userProfile_deleteAccount_buttonText))
                     }
                 }
 
                 // Dialog to Log out validation
                 if (showLogOutDialog) {
+                    val disconnectionMessage = stringResource(id = R.string.userProfile_disconnection_message)
                     LogActionDialog(
                         onDismiss = { showLogOutDialog = false },
                         onValidate = {
@@ -294,7 +344,7 @@ fun UserProfileScreen(
                             viewModel.signOutUser()
                             showLogOutDialog = false
                             coroutineScope.launch {
-                                snackBarHostState.showSnackbar("Deconnexion en cours...")
+                                snackBarHostState.showSnackbar(disconnectionMessage)
                             }
                         },
                         typeOfDialog = 1
@@ -303,6 +353,7 @@ fun UserProfileScreen(
 
                 // Dialog to delete account validation
                 if (showDeleteAccountDialog) {
+                    val deleteAccountMessage = stringResource(id = R.string.userProfile_deleteAccount_message)
                     LogActionDialog(
                         onDismiss = { showDeleteAccountDialog = false },
                         onValidate = {
@@ -310,7 +361,7 @@ fun UserProfileScreen(
                             viewModel.deleteUserAccount(user = currentAuthUser)
                             showDeleteAccountDialog = false
                             coroutineScope.launch {
-                                snackBarHostState.showSnackbar("Deleting your account...")
+                                snackBarHostState.showSnackbar(deleteAccountMessage)
                             }
                         },
                         typeOfDialog = 2
@@ -336,14 +387,19 @@ fun UserProfileTopBar(
     onUserPictureSelected: (Uri?) -> Unit,
     userProfileImageUrl: String? = null
 ){
+    val userProfileTopBarTitleContentDescription = stringResource(id = R.string.userProfile_topBar_contentDescription)
     TopAppBar(
         title = {
-            Text(text ="User profile",
+            Text(text = stringResource(R.string.userProfile_topBar_title),
                 color = eventorias_white,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 20.sp,
-                modifier = Modifier.padding(start = 8.dp))
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .semantics {
+                        contentDescription = userProfileTopBarTitleContentDescription
+                    })
         },
         colors = TopAppBarDefaults.topAppBarColors(eventorias_black),
         actions = {
@@ -365,39 +421,54 @@ fun UserProfileTopBar(
 @Composable
 fun LogActionDialog(onDismiss: () -> Unit, onValidate: () -> Unit, typeOfDialog: Int) {
     val title = when(typeOfDialog){
-        1 -> "Logout"
-        2 -> "Delete your account"
+        1 -> stringResource(R.string.actionDialog_logout_text)
+        2 -> stringResource(R.string.actionDialog_deleteAccount_text)
         else -> ""
     }
     val message = when(typeOfDialog){
-        1 -> "Are you sure to log out ?"
-        2 -> "Are you sure to delete your account ?\nWarning! this action can be reverted."
+        1 -> stringResource(R.string.actionDialog_logout_text_confirmation)
+        2 -> stringResource(R.string.actionDialog_deleteAccount_text_confirmation)
         else -> ""
     }
     val buttonText = when(typeOfDialog){
-        1 -> "Logout"
-        2 -> "Delete"
+        1 -> stringResource(R.string.actionDialog_logout_text)
+        2 -> stringResource(R.string.actionDialog_delete_text)
         else -> ""
     }
+
+
+    val alertDialogTitleContentDescription = stringResource(id = R.string.alertDialog_title_contentDescription)
+    val alertDialogMessageContentDescription = stringResource(id = R.string.alertDialog_message_contentDescription)
+    val alertDialogButtonConfirmContentDescription = stringResource(id = R.string.alertDialog_buttonConfirm_contentDescription)
+    val alertDialogButtonDismissContentDescription = stringResource(id = R.string.alertDialog_buttonDismiss_contentDescription)
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = title, style = TextStyle(color = Color.White, fontSize = 20.sp)) },
+        title = {
+            Text(text = title, style = TextStyle(color = Color.White, fontSize = 20.sp),modifier = Modifier.semantics { contentDescription = alertDialogTitleContentDescription}
+        ) },
         text = {
-            Text(text = message)
+            Text(text = message,
+                modifier = Modifier.semantics { contentDescription = alertDialogMessageContentDescription }
+            )
         },
         confirmButton = {
             Button(onClick = onValidate,
             colors = ButtonDefaults.buttonColors(
                 containerColor = eventorias_red,
                 contentColor = eventorias_white
-            )
+            ),
+                modifier = Modifier.semantics { contentDescription = alertDialogButtonConfirmContentDescription }
+
             ) {
                 Text(text = buttonText)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
+            TextButton(onClick = onDismiss,
+                modifier = Modifier.semantics { contentDescription = alertDialogButtonDismissContentDescription }
+            ) {
+                Text(text = stringResource(R.string.alertDialog_cancel_text))
             }
         }
     )
