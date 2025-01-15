@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -90,13 +91,14 @@ fun SignUpScreen(
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 fontSize = 26.sp,
+                modifier = Modifier.testTag("SignUpScreen_header_1")
             )
 
             Text(text = "Create a new account!",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
                 fontSize = 12.sp,
-                modifier = Modifier.padding(0.dp,8.dp,0.dp,0.dp)
+                modifier = Modifier.padding(0.dp,8.dp,0.dp,0.dp).testTag("SignUpScreen_header_2")
             )
 
 
@@ -126,7 +128,8 @@ fun SignUpScreen(
                     onValueChange = { firstName = it },
                     label = { Text("First Name", style = MaterialTheme.typography.labelMedium) },
                     placeholder = { Text("John", style = MaterialTheme.typography.bodyMedium) },
-                    modifier = Modifier.fillMaxWidth().weight(0.5f),
+                    modifier = Modifier.fillMaxWidth().weight(0.5f)
+                        .testTag("SignUpScreen_FirstNameInput"),
                     textStyle = TextStyle(color = Color.White),
                     singleLine = true,
                     maxLines = 1,
@@ -143,7 +146,8 @@ fun SignUpScreen(
                     onValueChange = { lastName = it },
                     label = { Text("Last Name", style = MaterialTheme.typography.labelMedium) },
                     placeholder = { Text("Doe", style = MaterialTheme.typography.bodyMedium) },
-                    modifier = Modifier.fillMaxWidth().weight(0.5f),
+                    modifier = Modifier.fillMaxWidth().weight(0.5f)
+                        .testTag("SignUpScreen_LastNameInput"),
                     textStyle = TextStyle(color = Color.White),
                     singleLine = true,
                     maxLines = 1,
@@ -165,7 +169,8 @@ fun SignUpScreen(
                 onValueChange = { email = it },
                 label = { Text("Email", style = MaterialTheme.typography.labelMedium) },
                 placeholder = { Text("Enter your email address", style = MaterialTheme.typography.bodyMedium) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("SignUpScreen_EmailInput"),
                 textStyle = TextStyle(color = Color.White),
                 singleLine = true,
                 maxLines = 1,
@@ -181,7 +186,8 @@ fun SignUpScreen(
                 onValueChange = { password = it },
                 label = { Text("Password", style = MaterialTheme.typography.labelMedium) },
                 placeholder = { Text("Enter your password", style = MaterialTheme.typography.bodyMedium) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("SignUpScreen_PasswordInput"),
                 textStyle = TextStyle(color = Color.White),
                 singleLine = true,
                 maxLines = 1,
@@ -213,7 +219,8 @@ fun SignUpScreen(
                     }
 
                 },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .testTag("SignUpScreen_SignUpButton"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = authentication_red, // Fond du bouton
                     contentColor = Color.White // Texte en noir
@@ -241,6 +248,7 @@ fun SignUpScreen(
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.clickable { onClickGoSignIn() }.align(Alignment.CenterVertically)
+                        .testTag("SignUpScreen_GoSignIn_A")
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
@@ -248,6 +256,7 @@ fun SignUpScreen(
                     color = Purple40,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clickable { onClickGoSignIn()  }.align(Alignment.CenterVertically)
+                        .testTag("SignUpScreen_GoSignIn_B")
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

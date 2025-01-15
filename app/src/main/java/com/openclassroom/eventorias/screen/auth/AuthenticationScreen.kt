@@ -44,7 +44,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 
 import androidx.compose.ui.unit.dp
@@ -152,10 +154,7 @@ fun AuthenticationScreen(
                         FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
                             .addOnCompleteListener { authTask ->
                                 if (authTask.isSuccessful) {
-                                    Log.d("SignIn", "Sign in successful: ${authTask.result?.user?.email}")
 
-
-                                    //todo - ADD THE NEW USER PROFILE TO FIRESTORE
                                     viewModel.addUserProfileEntryInDatabase(
                                         User(
                                             id = authTask.result.user!!.uid,
@@ -181,8 +180,6 @@ fun AuthenticationScreen(
     }
 
 
-
-
     // Bottom Sheet + screen main Content
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -196,7 +193,9 @@ fun AuthenticationScreen(
                 // Contenu de la sheet
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize().align(Alignment.TopCenter)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.TopCenter)
                 ) { page ->
                     // Calculer la position relative de la page par rapport à la page courante
                     val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
@@ -209,12 +208,25 @@ fun AuthenticationScreen(
                             .fillMaxSize()
                             .graphicsLayer {
                                 translationX = size.width * cubicEffect // Effet de translation
-                              //  alpha = 1 - (0.3f * kotlin.math.abs(cubicEffect)) // Réduction progressive de l'opacité
-                                scaleX = 1 - (0.1f * kotlin.math.abs(cubicEffect)) // Réduction progressive de la taille
+                                scaleX =
+                                    1 - (0.1f * kotlin.math.abs(cubicEffect)) // Réduction progressive de la taille
                                 scaleY = 1 - (0.1f * kotlin.math.abs(cubicEffect))
                             }
                     ) {
                         // Contenu des pages
+
+                        val authenticationMessageEmailRecovery = stringResource(R.string.authentication_emailRecovery_message)
+                        val authenticationMessageEmailMissing = stringResource(R.string.authentication_emailMissing_message)
+                        val authenticationMessagePasswordMissing = stringResource(R.string.authentication_passwordMissing_message)
+                        val authenticationMessageSignIn = stringResource(R.string.authentication_signIn_message)
+
+                        val authenticationMessageSignUp = stringResource(R.string.authentication_signUp_message)
+                        val authenticationMessageFirstNameMissing = stringResource(R.string.authentication_firstnameMissing_message)
+                        val authenticationMessageLastNameMissing = stringResource(R.string.authentication_LastnameMissing_message)
+                        val authenticationMessageSignUpEmailMissing = stringResource(R.string.authentication_SignUpEmailMissing_message)
+                        val authenticationMessageSignUpPasswordMissing = stringResource(R.string.authentication_SignUpPasswordMissing_message)
+
+
                         when (page) {
                             0 -> SignInScreen(
                                 onClickGoSignUp = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
@@ -225,7 +237,7 @@ fun AuthenticationScreen(
 
                                     }else{
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("An email is required for password recovery")
+                                            snackBarHostState.showSnackbar(authenticationMessageEmailRecovery)
                                         }
                                     }
                                 },
@@ -233,12 +245,12 @@ fun AuthenticationScreen(
 
                                     if (email.isEmpty()) {
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Please enter your email")
+                                            snackBarHostState.showSnackbar(authenticationMessageEmailMissing)
                                             signInButtonState = true
                                         }
                                     }else if (password.isEmpty()){
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Please enter your password")
+                                            snackBarHostState.showSnackbar(authenticationMessagePasswordMissing)
                                             signInButtonState = true
                                         }
                                     }else{
@@ -246,7 +258,7 @@ fun AuthenticationScreen(
                                         //All is ok to connect
                                         viewModel.signInUser(email = email, password = password)
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Sign in...")
+                                            snackBarHostState.showSnackbar(authenticationMessageSignIn)
                                         }
                                     }
                                 },
@@ -256,32 +268,30 @@ fun AuthenticationScreen(
                                 onClickGoSignIn = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                                 onSignUp = { email, password, firstName, lastName ->
                                     signUpButtonState = false // lock sign up button
-                                    // Check if the email and password are not empty
                                     if (email.isEmpty()) {
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("An email is required")
+                                            snackBarHostState.showSnackbar(authenticationMessageSignUpEmailMissing)
                                             signUpButtonState = true
                                         }
                                     }else if (password.isEmpty()){
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("A password is required")
+                                            snackBarHostState.showSnackbar(authenticationMessageSignUpPasswordMissing)
                                             signUpButtonState = true
                                         }
                                     }else if (firstName.isEmpty()){
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Please set your First Name")
+                                            snackBarHostState.showSnackbar(authenticationMessageFirstNameMissing)
                                             signUpButtonState = true
                                         }
                                     }else if (lastName.isEmpty()){
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Please set your Last Name")
+                                            snackBarHostState.showSnackbar(authenticationMessageLastNameMissing)
                                             signUpButtonState = true
                                         }
                                     }else{
-                                        //All is ok to create the new account
                                         viewModel.signUpUser(email = email, password = password, firstName = firstName, lastName = lastName)
                                         coroutineScope.launch {
-                                            snackBarHostState.showSnackbar("Sign up ...")
+                                            snackBarHostState.showSnackbar(authenticationMessageSignUp)
                                         }
                                     }
                                 },
@@ -294,11 +304,14 @@ fun AuthenticationScreen(
 
                 // SnackbarHost to inform user in divers action via a snackbar
                 SnackbarHost(hostState = snackBarHostState,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 42.dp))
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 42.dp))
 
             }
         },
         sheetBackgroundColor = Color.Transparent,
+        modifier = Modifier.testTag("AuthenticationScreen_bottomSheet")
     ) {
 
 
@@ -306,20 +319,26 @@ fun AuthenticationScreen(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(modifier = Modifier.align(Alignment.TopCenter).padding(top = 220.dp)) {
+            Column(modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 220.dp)) {
                 // Eventorias Mini ICO
                 Image(
                     painter = painterResource(id = R.drawable.eventorias_logo),
-                    contentDescription = "App logo",
-                    modifier = Modifier.size(64.dp)
+                    contentDescription = stringResource(R.string.authentication_appLogo_contentDescription),
+                    modifier = Modifier
+                        .size(64.dp)
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 // Eventorias Logo Title
                 Image(
                     painter = painterResource(id = R.drawable.eventorias_logo_full),
-                    contentDescription = "App title",
-                    modifier = Modifier.width(222.dp).height(21.dp).align(Alignment.CenterHorizontally)
+                    contentDescription = stringResource(R.string.authentication_appTitle_contentDescription),
+                    modifier = Modifier
+                        .width(222.dp)
+                        .height(21.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
 
                 Spacer(modifier = Modifier.height(72.dp))
@@ -344,10 +363,12 @@ fun AuthenticationScreen(
                     },
                     colors = ButtonDefaults.buttonColors(authentication_white),
                     shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
                         .padding(5.dp)
                         .width(242.dp)
                         .height(52.dp)
+                        .testTag("AuthenticationScreen_googleSignInButton")
                 ) {
                     Row(modifier = Modifier.fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -355,13 +376,13 @@ fun AuthenticationScreen(
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.icongoogle), // Utilise `painterResource` pour les fichiers PNG
-                            contentDescription = "Icon google",
+                            contentDescription = stringResource(R.string.authentication_googleLogo_contentDescription),
                             modifier = Modifier
                                 .size(24.dp)
                                 .weight(0.15f) // Ajuste la proportion
                         )
                         // Texte du bouton
-                        Text(text = "Sign in with Google",
+                        Text(text = stringResource(R.string.authentication_SignInWithGoogle_text),
                             color = Color.Black,
                             fontSize = 16.sp,
                             modifier = Modifier.weight(.85f)
@@ -381,25 +402,27 @@ fun AuthenticationScreen(
                     },
                     colors = ButtonDefaults.buttonColors(authentication_red), // Change la couleur du fond
                     shape = RoundedCornerShape(5.dp), // Boutons arrondis
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
                         .padding(5.dp)
                         .width(242.dp)
                         .height(52.dp)
+                        .testTag("AuthenticationScreen_emailSignInButton")
                 ) {
                     Row(modifier = Modifier.fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(22.dp) // Espace entre l'icône et le texte
                     ) {
-                        // Icone à gauche
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.baseline_mail_24), // Votre ressource vectorielle
-                            tint = Color.White, // Couleur de l'icône
-                            contentDescription = "Icon",
-                            modifier = Modifier.size(24.dp)
+                            tint = Color.White,
+                            contentDescription = stringResource(R.string.authentication_iconMail_contentDescription),
+                            modifier = Modifier
+                                .size(24.dp)
                                 .weight(.15f)
                         )
                         // Texte du bouton
-                        Text(text = "Sign in with email",
+                        Text(text = stringResource(R.string.authentication_SignInWithMail_text),
                             color = Color.White,
                             fontSize = 16.sp,
                             modifier = Modifier.weight(.85f)
@@ -413,13 +436,14 @@ fun AuthenticationScreen(
 
         // Dialog for password recovery
         if (showRecoveryPasswordDialog) {
+            val emailRecoveryMessage = stringResource(R.string.authentication_emailRecoverySuccess_message)
             ForgotPasswordDialog(
                 onDismiss = { showRecoveryPasswordDialog = false },
                 onSendEmail = {
                     // Send recovery email
                     viewModel.sendPasswordResetEmail(recoveryPasswordEmail)
                     coroutineScope.launch {
-                        snackBarHostState.showSnackbar("Un email de réinitialisation du mot de passe vous a ete envoyé!")
+                        snackBarHostState.showSnackbar(emailRecoveryMessage)
                     }
                     showRecoveryPasswordDialog = false
                 },
